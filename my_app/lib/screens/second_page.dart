@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'dart:convert';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_app/database.dart';
 
 Future<OneFood> fetchOneFood(String barcode) async {
+  if (int.parse(barcode) <= 0) {
+    throw Exception('Scanning Error, Try Again');
+  }
   print('get');
   final response = await http.get(
       'https://api.edamam.com/api/food-database/v2/parser?app_id=8add3e70&app_key=683c1aeb66ea0781dfff37d90754f831&upc=' +
@@ -92,14 +96,18 @@ class _QrCodeScanState extends State<QrCodeScan> {
 
   Future<void> addFood() async {
     helper.insertOneFood(await food);
-    Navigator.pop(context,true);
+    exitscreen(true);
+  }
+
+  void exitscreen(bool reload) {
+    Navigator.pop(context, reload);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         home: Scaffold(
-            appBar: AppBar(title: const Text('Barcode scan')),
+            appBar: AppBar(title: const Text('Add a food eaten')),
             body: Builder(builder: (BuildContext context) {
               return Container(
                   alignment: Alignment.center,
@@ -107,11 +115,13 @@ class _QrCodeScanState extends State<QrCodeScan> {
                       direction: Axis.vertical,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        RaisedButton(
-                            onPressed: () => runBarcodeThing(),
-                            child: Text("Start barcode scan")),
-                        Text('Scan result : $_scanBarcode\n',
-                            style: TextStyle(fontSize: 20)),
+                        Card(
+                          child: ListTile(
+                            title: Text('Scanned Barcode Value'),
+                            subtitle: Text(_scanBarcode),
+                            leading: new Icon(MdiIcons.barcodeScan, size: 50.0),
+                          ),
+                        ),
                         FutureBuilder<OneFood>(
                           future: food,
                           builder: (context, snapshot) {
@@ -123,23 +133,64 @@ class _QrCodeScanState extends State<QrCodeScan> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        'Name: ' + snapshot.data.label,
-                                        textAlign: TextAlign.center,
+                                      Card(
+                                        child: ListTile(
+                                          title: Text(snapshot.data.label),
+                                          subtitle: Text(
+                                            '${(snapshot.data.calories).toStringAsFixed(2)} kcal',
+                                          ),
+                                          trailing: new Icon(
+                                              MdiIcons.foodAppleOutline,
+                                              size: 50.0),
+                                        ),
                                       ),
-                                      Text(
-                                          '${(snapshot.data.calories).toStringAsFixed(2)} kcal'),
-                                      RaisedButton(
-                                        onPressed: () => addFood(),
-                                        child: Text("Add To Total"),
-                                      ),
+                                      ButtonBar(
+                                        children: [
+                                          FlatButton(
+                                            onPressed: () => exitscreen(false),
+                                            child: Text("Go Back"),
+                                          ),
+                                          RaisedButton(
+                                            onPressed: () => addFood(),
+                                            child: Text("Add To Total"),
+                                          ),
+                                        ],
+                                        alignment: MainAxisAlignment.center,
+                                      )
                                     ]);
                               } else {
-                                return Text(
-                                    "Food Not Found or an error occured");
+                                return Column(children: [
+                                  Text("Food Not Found or an error occured"),
+                                  ButtonBar(
+                                    children: [
+                                      FlatButton(
+                                        onPressed: () => exitscreen(false),
+                                        child: Text("Go Back"),
+                                      ),
+                                      RaisedButton(
+                                          onPressed: () => runBarcodeThing(),
+                                          child: Text("Retry Scan")),
+                                    ],
+                                    alignment: MainAxisAlignment.center,
+                                  )
+                                ]);
                               }
                             } else if (snapshot.hasError) {
-                              return Text("${snapshot.error}");
+                              return Column(children: [
+                                Text("${snapshot.error}"),
+                                ButtonBar(
+                                  children: [
+                                    FlatButton(
+                                      onPressed: () => exitscreen(false),
+                                      child: Text("Go Back"),
+                                    ),
+                                    RaisedButton(
+                                        onPressed: () => runBarcodeThing(),
+                                        child: Text("Retry Scan")),
+                                  ],
+                                  alignment: MainAxisAlignment.center,
+                                )
+                              ]);
                             }
 
                             return CircularProgressIndicator();

@@ -25,10 +25,12 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Column(children: [
-        getCalories("day"),
+        Card(child: getCalories("day")),
         Expanded(
-          child: getOneFoodListView(),
-        ),
+          child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5.0),
+              child: getOneFoodListView()),
+        )
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -71,13 +73,18 @@ class _HomePageState extends State<HomePage> {
         break;
       }
     }
-    return Text(
-      'Calories: ' + totalCalories.toStringAsFixed(2)+" in "+message,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 25,
-      ),
-    );
+    return Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 25.0,
+          horizontal: 5.0,
+        ),
+        child: Text(
+          totalCalories.toStringAsFixed(2) + " Calories recorded in " + message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 25,
+          ),
+        ));
   }
 
   DatabaseHelper databaseHelper = DatabaseHelper();
@@ -98,9 +105,13 @@ class _HomePageState extends State<HomePage> {
           elevation: 2.0,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: Colors.yellow,
-              child: Text(getFirstLetter(this.oneFoodList[position].label),
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.amber,
+              child: Center(
+                  child: Text(getFirstLetter(this.oneFoodList[position].label),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ))),
             ),
             title: Text(this.oneFoodList[position].label,
                 style: TextStyle(fontWeight: FontWeight.bold)),
@@ -112,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                 GestureDetector(
                   child: Icon(
                     Icons.delete,
-                    color: Colors.red,
+                    color: Colors.blueGrey,
                   ),
                   onTap: () {
                     _delete(context, oneFoodList[position]);
@@ -131,7 +142,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   getFirstLetter(String title) {
-    return title.substring(0, 2);
+    return title.substring(0, 2).toUpperCase();
   }
 
   void _delete(BuildContext context, OneFood oneFood) async {
@@ -140,7 +151,11 @@ class _HomePageState extends State<HomePage> {
     int result = await databaseHelper.deleteOneFood(oneFood.time);
     print(result);
     if (result != 0) {
-      _showSnackBar(context, 'OneFood Deleted Successfully');
+      String name = oneFood.label.substring(0, 24);
+      if (oneFood.label.length > 25) {
+        name += '...';
+      }
+      _showSnackBar(context, '$name Deleted Successfully');
       updateListView();
     }
   }
