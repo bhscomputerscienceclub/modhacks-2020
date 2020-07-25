@@ -5,7 +5,6 @@ import 'package:my_app/database.dart';
 
 void main() {
   runApp(App());
-  dbinit();
 
   Wakelock.enable(); //REMOVE WHEN PUBLISHING
 }
