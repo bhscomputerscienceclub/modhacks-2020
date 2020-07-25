@@ -14,8 +14,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _counter = 0;
 
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
 
 
+
+  Widget _list() {
+    return FutureBuilder(
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        //show progress bar if no data
+        if (snapshot.connectionState == ConnectionState.none &&
+            !snapshot.hasData) {
+          return Text('No emoji');
+        }
+        return ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              return ListTile(title: Text(snapshot.data[index].label));
+            });
+      },
+      future: foods(),
+      initialData: List<OneFood>(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +60,7 @@ class _HomePageState extends State<HomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            _list(),
           ],
         ),
       ),
