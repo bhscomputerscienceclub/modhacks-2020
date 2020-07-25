@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:my_app/database.dart';
 
 void main() {
   runApp(App());
-  dbinit();
 
   Wakelock.enable(); //REMOVE WHEN PUBLISHING
 }

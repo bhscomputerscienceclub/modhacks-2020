@@ -32,7 +32,7 @@ class QrCodeScan extends StatefulWidget {
 class _QrCodeScanState extends State<QrCodeScan> {
   String _scanBarcode = 'Unknown';
   String _foodName = 'Unknown';
-
+  DatabaseHelper helper = DatabaseHelper();
   @override
   void initState() {
     super.initState();
@@ -69,6 +69,9 @@ class _QrCodeScanState extends State<QrCodeScan> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       food = fetchOneFood(_scanBarcode);
+      print('got food');
+      print((await food));
+      foodout = (await food).label;
     } on PlatformException {
       foodout = 'Failed to get platform version.';
     }
@@ -85,6 +88,11 @@ class _QrCodeScanState extends State<QrCodeScan> {
 
   Future<void> runBarcodeThing() async {
     scanBarcodeNormal();
+  }
+
+  Future<void> addFood() async {
+    helper.insertOneFood(await food);
+    Navigator.pop(context,true);
   }
 
   @override
@@ -122,7 +130,7 @@ class _QrCodeScanState extends State<QrCodeScan> {
                                       Text(
                                           '${(snapshot.data.calories).toStringAsFixed(2)} kcal'),
                                       RaisedButton(
-                                        onPressed: () => true,
+                                        onPressed: () => addFood(),
                                         child: Text("Add To Total"),
                                       ),
                                     ]);
