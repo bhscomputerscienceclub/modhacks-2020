@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:my_app/screens/second_page.dart';
 import 'package:my_app/database.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:math';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:my_app/screens/manual_activity.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -25,42 +29,74 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Column(children: [
-        Card(child: getCalories("day")),
+        Card(child: getCalories()),
         Expanded(
           child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 5.0),
               child: getOneFoodListView()),
         )
       ]),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          bool a = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => QrCodeScan()),
-          );
-          if (a) {
-            updateListView();
-          }
-        },
-        tooltip: 'Add new activity',
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: getFAB(),
     );
   }
 
-  Widget getCalories(String time) {
+  bool dialVisible = true;
+  Widget getFAB() {
+    return SpeedDial(
+      animatedIcon: AnimatedIcons.menu_close,
+      animatedIconTheme: IconThemeData(size: 22.0),
+      // child: Icon(Icons.add),
+      onOpen: () => print('OPENING DIAL'),
+      onClose: () => print('DIAL CLOSED'),
+      visible: dialVisible,
+      curve: Curves.bounceIn,
+      children: [
+        SpeedDialChild(
+          child: Icon(MdiIcons.barcodeScan, color: Colors.white),
+          backgroundColor: Colors.deepOrange,
+          onTap: () async {
+            bool a = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => QrCodeScan()),
+            );
+            if (a) {
+              updateListView();
+            }
+          },
+          label: 'Barcode Scan',
+          labelStyle: TextStyle(fontWeight: FontWeight.w500),
+          labelBackgroundColor: Colors.deepOrangeAccent,
+        ),
+        SpeedDialChild(
+          child: Icon(MdiIcons.pencilPlusOutline, color: Colors.white),
+          backgroundColor: Colors.green,
+          onTap: () async {
+            bool a = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ManualActivity()),
+            );
+            if (a) {
+              updateListView();
+            }
+          },
+          label: 'Manual Activity',
+          labelStyle: TextStyle(fontWeight: FontWeight.w500),
+          labelBackgroundColor: Colors.green,
+        ),
+      ],
+    );
+  }
+
+  List<bool> isSelected = [true, false, false];
+  Widget getCalories() {
     print('getcalories');
     int timeinterval;
-    String message;
-    if (time == "day") {
+    if (isSelected[1]) {
       timeinterval = 86400;
-      message = "the last 24 hours";
-    } else if (time == "week") {
+    } else if (isSelected[2]) {
       timeinterval = 86400 * 7;
-      message = "this week";
-    } else if (time == "hour") {
+    } else if (isSelected[0]) {
       timeinterval = (86400 / 24).round();
-      message = "the last hour";
     }
     timeinterval = timeinterval * 1000;
     int now = DateTime.now().millisecondsSinceEpoch;
@@ -73,18 +109,56 @@ class _HomePageState extends State<HomePage> {
         break;
       }
     }
-    return Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 25.0,
-          horizontal: 5.0,
-        ),
-        child: Text(
-          totalCalories.toStringAsFixed(2) + " Calories recorded in " + message,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 25,
-          ),
-        ));
+    return Row(
+      children: [
+        Expanded(
+            child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 5.0,
+                ),
+                child: ListTile(
+                  title: Text(
+                    totalCalories.toStringAsFixed(2) + " Calories recorded",
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  subtitle: Text(
+                      '${(totalCalories / (2000 * timeinterval / (86400 * 1000)) * 100).toStringAsFixed(1)}% average recommended value'),
+                ))),
+        RotatedBox(
+            quarterTurns: 1,
+            child: ToggleButtons(
+              color: Colors.blueAccent,
+              splashColor: Colors.transparent,
+              constraints: BoxConstraints(
+                minWidth: 40.0, //actually height because rotate
+                maxWidth: 100,
+                minHeight: 40.0, //actually width
+                maxHeight: 100,
+              ),
+              children: <Widget>[
+                RotatedBox(quarterTurns: 3, child: Text('Hour')),
+                RotatedBox(quarterTurns: 3, child: Text('Day')),
+                RotatedBox(quarterTurns: 3, child: Text('Week')),
+              ],
+              isSelected: isSelected,
+              onPressed: (int index) {
+                setState(() {
+                  for (int indexBtn = 0;
+                      indexBtn < isSelected.length;
+                      indexBtn++) {
+                    if (indexBtn == index) {
+                      isSelected[indexBtn] = true;
+                    } else {
+                      isSelected[indexBtn] = false;
+                    }
+                  }
+                });
+              },
+            )),
+      ],
+    );
   }
 
   DatabaseHelper databaseHelper = DatabaseHelper();
@@ -151,8 +225,9 @@ class _HomePageState extends State<HomePage> {
     int result = await databaseHelper.deleteOneFood(oneFood.time);
     print(result);
     if (result != 0) {
-      String name = oneFood.label.substring(0, 24);
-      if (oneFood.label.length > 25) {
+      int len = min(24, oneFood.label.length);
+      String name = oneFood.label.substring(0, len - 1);
+      if (oneFood.label.length > len) {
         name += '...';
       }
       _showSnackBar(context, '$name Deleted Successfully');
