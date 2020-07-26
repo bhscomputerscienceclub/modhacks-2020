@@ -112,105 +112,79 @@ class _QrCodeScanState extends State<QrCodeScan> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(title: const Text('Add a food eaten')),
-            body: Builder(builder: (BuildContext context) {
-              return Container(
-                  alignment: Alignment.center,
-                  child: Flex(
-                      direction: Axis.vertical,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Card(
-                          child: ListTile(
-                            title: Text('Scanned Barcode Value'),
-                            subtitle: Text(_scanBarcode),
-                            leading: new Icon(MdiIcons.barcodeScan, size: 50.0),
-                          ),
-                        ),
-                        FutureBuilder<OneFood>(
-                          future: food,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              print(snapshot.data.works);
-                              if (snapshot.data.works) {
-                                return Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Card(
-                                        child: ListTile(
-                                          title: Text(snapshot.data.label),
-                                          subtitle: Text(
-                                            '${(snapshot.data.calories).toStringAsFixed(2)} kcal per serving',
-                                          ),
-                                          trailing: new Icon(
-                                              MdiIcons.foodAppleOutline,
-                                              size: 50.0),
-                                        ),
+    return Scaffold(
+        appBar: AppBar(title: const Text('Add Food')),
+        body: Builder(builder: (BuildContext context) {
+          return Container(
+              alignment: Alignment.center,
+              child: Flex(
+                  direction: Axis.vertical,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Card(
+                      child: ListTile(
+                        title: Text('Scanned Barcode Value'),
+                        subtitle: Text(_scanBarcode),
+                        leading: new Icon(MdiIcons.barcodeScan, size: 50.0),
+                      ),
+                    ),
+                    FutureBuilder<OneFood>(
+                      future: food,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          print(snapshot.data.works);
+                          if (snapshot.data.works) {
+                            return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Card(
+                                    child: ListTile(
+                                      title: Text(snapshot.data.label),
+                                      subtitle: Text(
+                                        '${(snapshot.data.calories).toStringAsFixed(2)} kcal per serving',
                                       ),
-                                      Card(
-                                        child: ListTile(
-                                          title: Text((() {
-                                                if (snapshot
-                                                        .data.servingConsumed ==
-                                                    1) {
-                                                  return 'serving => Total Calories: ';
-                                                } else {
-                                                  return 'servings => Total Calories: ';
-                                                }
-                                              }()) +
-                                              (snapshot.data.calories *
-                                                      snapshot
-                                                          .data.servingConsumed)
-                                                  .toString()),
-                                          subtitle: Text(
-                                              '${(snapshot.data.servingQty).toStringAsFixed(2)} ${snapshot.data.servingUnit} each'),
-                                          leading: Container(
-                                              width: 40,
-                                              child: OutlineButton(
-                                                borderSide: BorderSide(
-                                                    width: 2,
-                                                    color: Colors.blueGrey),
-                                                onPressed: () =>
-                                                    showMaterialNumberPicker(
-                                                  context: context,
-                                                  title: "Number of Servings",
-                                                  maxNumber: 20,
-                                                  minNumber: 1,
-                                                  selectedNumber: snapshot
-                                                      .data.servingConsumed,
-                                                  onChanged: (value) =>
-                                                      setState(() => snapshot
-                                                              .data
-                                                              .servingConsumed =
-                                                          value),
-                                                ),
-                                                child: Text(snapshot
-                                                    .data.servingConsumed
-                                                    .toString()),
-                                              )),
-                                        ),
-                                      ),
-                                      ButtonBar(
-                                        children: [
-                                          FlatButton(
-                                            onPressed: () => exitscreen(false),
-                                            child: Text("Go Back"),
-                                          ),
-                                          RaisedButton(
-                                            onPressed: () => addFood(),
-                                            child: Text("Add To Total"),
-                                          ),
-                                        ],
-                                        alignment: MainAxisAlignment.center,
-                                      )
-                                    ]);
-                              } else {
-                                return Column(children: [
-                                  Text("Food Not Found or an error occured"),
+                                      trailing:
+                                          new Icon(MdiIcons.food, size: 50.0),
+                                    ),
+                                  ),
+                                  Card(
+                                    child: ListTile(
+                                      title: Text((() {
+                                            if (snapshot.data.servingConsumed ==
+                                                1) {
+                                              return 'serving (';
+                                            } else {
+                                              return 'servings (';
+                                            }
+                                          }()) +
+                                          '${(snapshot.data.servingQty).toStringAsFixed(2)} ${snapshot.data.servingUnit})'),
+                                      subtitle: Text(
+                                          '${(snapshot.data.calories * snapshot.data.servingConsumed).toString()} Calories'),
+                                      leading: Container(
+                                          width: 40,
+                                          child: OutlineButton(
+                                            borderSide: BorderSide(
+                                                width: 2,
+                                                color: Colors.blueGrey),
+                                            onPressed: () =>
+                                                showMaterialNumberPicker(
+                                              context: context,
+                                              title: "Number of Servings",
+                                              maxNumber: 20,
+                                              minNumber: 1,
+                                              selectedNumber:
+                                                  snapshot.data.servingConsumed,
+                                              onChanged: (value) => setState(
+                                                  () => snapshot.data
+                                                      .servingConsumed = value),
+                                            ),
+                                            child: Text(snapshot
+                                                .data.servingConsumed
+                                                .toString()),
+                                          )),
+                                    ),
+                                  ),
                                   ButtonBar(
                                     children: [
                                       FlatButton(
@@ -218,35 +192,52 @@ class _QrCodeScanState extends State<QrCodeScan> {
                                         child: Text("Go Back"),
                                       ),
                                       RaisedButton(
-                                          onPressed: () => runBarcodeThing(),
-                                          child: Text("Retry Scan")),
+                                        onPressed: () => addFood(),
+                                        child: Text("Add To Total"),
+                                      ),
                                     ],
                                     alignment: MainAxisAlignment.center,
                                   )
                                 ]);
-                              }
-                            } else if (snapshot.hasError) {
-                              return Column(children: [
-                                Text("${snapshot.error}"),
-                                ButtonBar(
-                                  children: [
-                                    FlatButton(
-                                      onPressed: () => exitscreen(false),
-                                      child: Text("Go Back"),
-                                    ),
-                                    RaisedButton(
-                                        onPressed: () => runBarcodeThing(),
-                                        child: Text("Retry Scan")),
-                                  ],
-                                  alignment: MainAxisAlignment.center,
-                                )
-                              ]);
-                            }
+                          } else {
+                            return Column(children: [
+                              Text("Food Not Found or an error occured"),
+                              ButtonBar(
+                                children: [
+                                  FlatButton(
+                                    onPressed: () => exitscreen(false),
+                                    child: Text("Go Back"),
+                                  ),
+                                  RaisedButton(
+                                      onPressed: () => runBarcodeThing(),
+                                      child: Text("Retry Scan")),
+                                ],
+                                alignment: MainAxisAlignment.center,
+                              )
+                            ]);
+                          }
+                        } else if (snapshot.hasError) {
+                          return Column(children: [
+                            Text("${snapshot.error}"),
+                            ButtonBar(
+                              children: [
+                                FlatButton(
+                                  onPressed: () => exitscreen(false),
+                                  child: Text("Go Back"),
+                                ),
+                                RaisedButton(
+                                    onPressed: () => runBarcodeThing(),
+                                    child: Text("Retry Scan")),
+                              ],
+                              alignment: MainAxisAlignment.center,
+                            )
+                          ]);
+                        }
 
-                            return CircularProgressIndicator();
-                          },
-                        ),
-                      ]));
-            })));
+                        return CircularProgressIndicator();
+                      },
+                    ),
+                  ]));
+        }));
   }
 }

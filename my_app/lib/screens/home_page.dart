@@ -53,19 +53,21 @@ class _HomePageState extends State<HomePage> {
       children: [
         SpeedDialChild(
           child: Icon(MdiIcons.barcodeScan, color: Colors.white),
-          backgroundColor: Colors.deepOrange,
+          backgroundColor: Colors.red[600],
           onTap: () async {
-            bool a = await Navigator.push(
+            bool a;
+            a = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => QrCodeScan()),
             );
+            a ??= true;
             if (a) {
               updateListView();
             }
           },
           label: 'Barcode Scan',
           labelStyle: TextStyle(fontWeight: FontWeight.w500),
-          labelBackgroundColor: Colors.deepOrangeAccent,
+          labelBackgroundColor: Colors.red[500],
         ),
         SpeedDialChild(
           child: Icon(MdiIcons.pencilPlusOutline, color: Colors.white),
@@ -118,18 +120,22 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: ListTile(
                   title: Text(
-                    totalCalories.toStringAsFixed(2) + " Calories recorded",
+                    totalCalories.toStringAsFixed(2),
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 35,
                     ),
+                    textAlign: TextAlign.center,
                   ),
+                  isThreeLine: true,
                   subtitle: Text(
-                      '${(totalCalories / (2000 * timeinterval / (86400 * 1000)) * 100).toStringAsFixed(1)}% average recommended value'),
+                    'calories recorded \n ${(totalCalories / (2000 * timeinterval / (86400 * 1000)) * 100).toStringAsFixed(1)}% recommended value',
+                    textAlign: TextAlign.center,
+                  ),
                 ))),
         RotatedBox(
             quarterTurns: 1,
             child: ToggleButtons(
-              color: Colors.blueAccent,
+              color: Theme.of(context).primaryColor,
               splashColor: Colors.transparent,
               constraints: BoxConstraints(
                 minWidth: 40.0, //actually height because rotate
@@ -178,15 +184,6 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           elevation: 2.0,
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.amber,
-              child: Center(
-                  child: Text(getFirstLetter(this.oneFoodList[position].label),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ))),
-            ),
             title: Text(this.oneFoodList[position].label,
                 style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(
@@ -206,10 +203,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            onTap: () {
-              debugPrint("ListTile Tapped");
-              //TODO navigateToDetail(this.oneFoodList[position], 'Edit OneFood');
-            },
           ),
         );
       },

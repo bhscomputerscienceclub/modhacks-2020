@@ -139,10 +139,9 @@ class _ManualActivityState extends State<ManualActivity> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
+    return Scaffold(
             key: _scaffoldKey,
-            appBar: AppBar(title: const Text('Add a food eaten')),
+            appBar: AppBar(title: const Text('Add Manual Activity')),
             body: Builder(builder: (BuildContext context) {
               return Container(
                   alignment: Alignment.center,
@@ -154,6 +153,6 @@ class _ManualActivityState extends State<ManualActivity> {
                           child: getForm(),
                         )
                       ]));
-            })));
+            }));
   }
 }

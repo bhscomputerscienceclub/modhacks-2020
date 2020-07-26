@@ -14,10 +14,13 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Apeiron',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
+        accentColor: Colors.blueAccent[300],
+        buttonTheme: ButtonThemeData(buttonColor: Colors.teal),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(title: 'Apeiron'),
+      home: HomePage(title: 'apeiron'),
+      
     );
   }
 }
