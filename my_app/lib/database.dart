@@ -58,7 +58,8 @@ class DatabaseHelper {
   Future<int> insertOneFood(OneFood oneFood) async {
     Database db = await this.database;
 
-    var result = await db.insert(oneFoodTable, oneFood.toMap(),conflictAlgorithm: ConflictAlgorithm.replace);
+    var result = await db.insert(oneFoodTable, oneFood.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
     return result;
   }
 
@@ -74,7 +75,7 @@ class DatabaseHelper {
     print('del ' + time.toString());
     var db = await this.database;
     int result =
-        await db.delete(oneFoodTable,where: "$colId = ?",whereArgs: [time]);
+        await db.delete(oneFoodTable, where: "$colId = ?", whereArgs: [time]);
     print(result);
     return result;
   }
@@ -107,20 +108,34 @@ class DatabaseHelper {
 
 class OneFood {
   final String label;
-  final double calories;
+  double calories;
   final bool works;
   int time;
+  var servingQty;
+  final String servingUnit;
+  int servingConsumed = 1;
 //OneFood FIGURE OUT IF THIS DEFAULT PARAMETER THING BREAKS
-  OneFood({this.label, this.calories, this.works, this.time}) {
+  OneFood({
+    this.label,
+    this.calories,
+    this.works,
+    this.time,
+    this.servingQty,
+    this.servingUnit,
+  }) {
     this.time ??= DateTime.now().millisecondsSinceEpoch;
   }
 
   factory OneFood.fromJson(Map<String, dynamic> json, bool found) {
     if (found) {
       return OneFood(
-        label: json['hints'][0]['food']['label'],
-        calories: json['hints'][0]['food']['nutrients']['ENERC_KCAL'],
+        label: json['foods'][0]['brand_name'] +
+            ' ' +
+            json['foods'][0]['food_name'],
+        calories: double.parse(json['foods'][0]['nf_calories'].toString()),
         works: found,
+        servingQty: json['foods'][0]['serving_qty'],
+        servingUnit: json['foods'][0]['serving_unit'],
       );
     } else {
       return OneFood(
@@ -135,7 +150,7 @@ class OneFood {
     return {
       'time': time,
       'label': label,
-      'calories': calories,
+      'calories': calories*servingConsumed,
     };
   }
 

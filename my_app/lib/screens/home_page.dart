@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<bool> isSelected = [true, false, false];
+  List<bool> isSelected = [false, true, false];
   Widget getCalories() {
     print('getcalories');
     int timeinterval;
@@ -189,8 +189,9 @@ class _HomePageState extends State<HomePage> {
             ),
             title: Text(this.oneFoodList[position].label,
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle:
-                Text(this.oneFoodList[position].calories.toStringAsFixed(2)),
+            subtitle: Text(
+                this.oneFoodList[position].calories.toStringAsFixed(2) +
+                    ' Calories'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[

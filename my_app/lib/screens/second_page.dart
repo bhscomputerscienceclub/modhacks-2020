@@ -1,3 +1,4 @@
+import 'package:flutter_material_pickers/flutter_material_pickers.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -12,11 +13,17 @@ Future<OneFood> fetchOneFood(String barcode) async {
   if (int.parse(barcode) <= 0) {
     throw Exception('Scanning Error, Try Again');
   }
+  Map<String, String> requestHeaders = {
+    "x-app-id": "b5bc0386",
+    "x-app-key": "04b325ce58366ad94a40bd147bbf491a",
+  };
   print('get');
   final response = await http.get(
-      'https://api.edamam.com/api/food-database/v2/parser?app_id=8add3e70&app_key=683c1aeb66ea0781dfff37d90754f831&upc=' +
-          barcode);
-
+    'https://trackapi.nutritionix.com/v2/search/item?&upc=' + barcode,
+    headers: requestHeaders,
+  );
+  print(response);
+  print(response.statusCode);
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
@@ -137,11 +144,54 @@ class _QrCodeScanState extends State<QrCodeScan> {
                                         child: ListTile(
                                           title: Text(snapshot.data.label),
                                           subtitle: Text(
-                                            '${(snapshot.data.calories).toStringAsFixed(2)} kcal',
+                                            '${(snapshot.data.calories).toStringAsFixed(2)} kcal per serving',
                                           ),
                                           trailing: new Icon(
                                               MdiIcons.foodAppleOutline,
                                               size: 50.0),
+                                        ),
+                                      ),
+                                      Card(
+                                        child: ListTile(
+                                          title: Text((() {
+                                                if (snapshot
+                                                        .data.servingConsumed ==
+                                                    1) {
+                                                  return 'serving => Total Calories: ';
+                                                } else {
+                                                  return 'servings => Total Calories: ';
+                                                }
+                                              }()) +
+                                              (snapshot.data.calories *
+                                                      snapshot
+                                                          .data.servingConsumed)
+                                                  .toString()),
+                                          subtitle: Text(
+                                              '${(snapshot.data.servingQty).toStringAsFixed(2)} ${snapshot.data.servingUnit} each'),
+                                          leading: Container(
+                                              width: 40,
+                                              child: OutlineButton(
+                                                borderSide: BorderSide(
+                                                    width: 2,
+                                                    color: Colors.blueGrey),
+                                                onPressed: () =>
+                                                    showMaterialNumberPicker(
+                                                  context: context,
+                                                  title: "Number of Servings",
+                                                  maxNumber: 20,
+                                                  minNumber: 1,
+                                                  selectedNumber: snapshot
+                                                      .data.servingConsumed,
+                                                  onChanged: (value) =>
+                                                      setState(() => snapshot
+                                                              .data
+                                                              .servingConsumed =
+                                                          value),
+                                                ),
+                                                child: Text(snapshot
+                                                    .data.servingConsumed
+                                                    .toString()),
+                                              )),
                                         ),
                                       ),
                                       ButtonBar(
